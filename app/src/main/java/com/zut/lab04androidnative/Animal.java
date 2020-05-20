@@ -24,8 +24,8 @@ public class Animal implements Serializable {
     @NonNull
     @Override
     public String toString() {
-        return String.format("Zwierze: [id = %s, gatunek = %s, kolor = %s, wielkosc = %s]",
-                id, gatunek, kolor, wielkosc);
+        return String.format("Zwierze: [id = %s, gatunek = %s, kolor = %s, wielkosc = %s, opis = %s ] ",
+                id, gatunek, kolor, wielkosc, opis);
     }
 
 
