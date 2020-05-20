@@ -8,9 +8,14 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +42,30 @@ public class MainActivity extends AppCompatActivity {
 
         ListView listView = findViewById(R.id.animalListView);
         listView.setAdapter(this.adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                TextView name = view.findViewById(android.R.id.text1);
+                Animal animal = db.getAnimal(Integer.parseInt(name.getText().toString()));
+
+                Intent intent = new Intent(getApplicationContext(), DodajWpis.class);
+                intent.putExtra("element", animal);
+                startActivityForResult(intent,2);
+            }
+        });
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                TextView name = view.findViewById(android.R.id.text1);
+                Animal animal = db.getAnimal(Integer.parseInt(name.getText().toString()));
+                db.removeAnimal(String.valueOf(animal.getId()));
+                adapter.changeCursor(db.list());
+                adapter.notifyDataSetChanged();
+                Snackbar.make(view, "usunięto " + animal.getGatunek(), Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return true;
+            }
+        });
     }
 
     @Override
@@ -50,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == 1 && resultCode == RESULT_OK){
             Bundle extras = data.getExtras();
 //            String nowy = (String) extras.get("wpis");
@@ -59,6 +89,15 @@ public class MainActivity extends AppCompatActivity {
             adapter.changeCursor(db.list());
             adapter.notifyDataSetChanged();
         }
+
+        if (requestCode == 2 && resultCode == RESULT_OK){
+            Bundle extras = data.getExtras();
+            Animal newAnimal = (Animal) extras.getSerializable("newAnimal");
+            this.db.updateAnimal(newAnimal);
+            adapter.changeCursor(db.list());
+            adapter.notifyDataSetChanged();
+        }
+
     }
 
     public void nowyWpis(MenuItem menuItem){
